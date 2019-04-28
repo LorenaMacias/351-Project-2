@@ -1,17 +1,17 @@
 //process queue
-typedef struct proc_queue {
+typedef struct process_queue {
     int capacity;
     int size;
     int front;
     int rear;
     PROCESS **elements;
-} proc_queue;
+} process_queue;
 
 //creates the queue given the length
-proc_queue* create_proc_queue(int length) {
-    proc_queue *q;
+process_queue* create_process_queue(int length) {
+    process_queue *q;
 
-    q = malloc(sizeof(proc_queue));
+    q = malloc(sizeof(process_queue));
 
     q->elements = malloc(sizeof(PROCESS) * length);
     q->size = 0;
@@ -23,11 +23,10 @@ proc_queue* create_proc_queue(int length) {
 }
 
 //add to the queue
-void enqueue_proc(proc_queue* q, PROCESS* proc) {
+void enqueue_process(process_queue* q, PROCESS* process) {
     if (q->size == q->capacity) {
         printf("ERROR: queue is full to capacity!\n");
-
-        exit(2);
+	exit(2);
     }
 
     q->size++;
@@ -36,36 +35,33 @@ void enqueue_proc(proc_queue* q, PROCESS* proc) {
     if (q->rear == q->capacity) {
         q->rear = 0;
     }
-
-    q->elements[q->rear] = proc;
+    q->elements[q->rear] = process;
 }
 
 //checks is the queue has somthing next to it given the process
-int queue_has_next(proc_queue* q) {
+int queue_has_next(process_queue* q) {
     return q->size == 0 ? 0 : 1;
 }
 
-PROCESS* peek_queue(proc_queue* q) {
+PROCESS* peek_queue(process_queue* q) {
     if (!queue_has_next(q)) {
         printf("ERROR: queue is empty, can't get the next element\n");
         exit(2);
     }
-
     return q->elements[q->front];
 }
 
-PROCESS* peek_queue_at_index(proc_queue* q, int index) {
+PROCESS* peek_queue_at_index(process_queue* q, int index) {
     return q->elements[index];
 }
 
-void dequeue_proc(proc_queue* q) {
+void dequeue_process(process_queue* q) {
     if (!queue_has_next(q)) {
         printf("ERROR: queue is empty, can't dequeue anything\n");
         exit(2);
     }
-
-    q->size--;
-    q->front++;
+   q->size--;
+   q->front++;
 
     if (q->front == q->capacity) {
         q->front = 0;
@@ -73,20 +69,19 @@ void dequeue_proc(proc_queue* q) {
 }
 
 //iterates through the queue
-int iterate_queue_index(proc_queue* q, int index) {
+int iterate_queue_index(process_queue* q, int index) {
     return q->front + index;
 }
 
 //remove the process from queue
-void dequeue_proc_at_index(proc_queue* q, int index) {
+void dequeue_process_at_index(process_queue* q, int index) {
     int i, prev = 0;
 
     for (i = 0; i < q->size; i += 1) {
         if (i > index) {
             q->elements[prev] = q->elements[i];
         }
-
-        prev = i;
+	prev = i;
     }
 
     q->size--;
@@ -94,21 +89,21 @@ void dequeue_proc_at_index(proc_queue* q, int index) {
 }
 
 //print whole queue
-void print_proc_queue(proc_queue* q) {
+void print_process_queue(process_queue* q) {
     int counter;
 
     //temp process
-    PROCESS* proc;
+    PROCESS* process;
 
     printf("\tInput queue: [");
     for (counter = 0; counter < q->size; counter += 1) {
-        proc = peek_queue_at_index(q, iterate_queue_index(q, counter));
+        process = peek_queue_at_index(q, iterate_queue_index(q, counter));
 
 	if(counter != (q->size - 1)) { 
-        printf("%d ", proc->pid);
+        printf("%d ", process->pid);
 	}
 	else{
-	printf("%d", proc->pid);
+	printf("%d", process->pid);
 	printf("]\n");
 	return;
 	}
