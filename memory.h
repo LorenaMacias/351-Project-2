@@ -2,7 +2,7 @@
 typedef struct FRAME {
     int assigned;
     char location[40];
-    int proc_assign;
+    int process_assign;
     int page_num;
 } FRAME;
 
@@ -30,7 +30,7 @@ frame_list* create_frame_list(int number_of_frames, int page_size) {
     return f;
 }
 
-int proc_can_fit_into_memory(frame_list* list, PROCESS* proc) {
+int process_can_fit_into_memory(frame_list* list, PROCESS* process) {
     int i, num_free_frames = 0;
 
     for (i = 0; i < list->number_of_frames; i += 1) {
@@ -40,14 +40,14 @@ int proc_can_fit_into_memory(frame_list* list, PROCESS* proc) {
     }
 
     //checks if the number of free frames times the page size is greater than the mem_req for the   	given process
-    return (num_free_frames * list->page_size) >= proc->mem_reqs;
+    return (num_free_frames * list->page_size) >= process->mem_reqs;
 }
 
-void fit_proc_into_memory(frame_list* list, PROCESS* proc) {
+void fit_process_into_memory(frame_list* list, PROCESS* process) {
     //assuming you already checked that you are able to fit the proc into mem 
     int i, remaining_mem, current_page = 1;
 
-    remaining_mem = proc->mem_reqs;
+    remaining_mem = process->mem_reqs;
 
     for (i = 0; i < list->number_of_frames; i += 1) {
         // if this frame is not assigned
@@ -57,7 +57,7 @@ void fit_proc_into_memory(frame_list* list, PROCESS* proc) {
             // set the page number
             list->frames[i].page_num = current_page;
             // set the proc num
-            list->frames[i].proc_assign = proc->pid;
+            list->frames[i].process_assign = process->pid;
 
             current_page++;
             remaining_mem -= list->page_size;
@@ -93,7 +93,7 @@ void print_frame_list(frame_list* list) {
             printf("%d-%d: Process %d, Page %d\n",
                    i * list->page_size,
                    ((i + 1) * list->page_size) - 1,
-                  list->frames[i].proc_assign,
+                  list->frames[i].process_assign,
                   list->frames[i].page_num);
         }
 	//else it prints on a new line and it tabs the pages
@@ -101,7 +101,7 @@ void print_frame_list(frame_list* list) {
             printf("\t\t%d-%d: Process %d, Page %d\n",
                    i * list->page_size,
                    ((i + 1) * list->page_size) - 1,
-                  list->frames[i].proc_assign,
+                  list->frames[i].process_assign,
                   list->frames[i].page_num);
         }
     }//end of for loop
@@ -112,7 +112,7 @@ void print_frame_list(frame_list* list) {
                ((i) * list->page_size) - 1);
     }
    //this prints the frame numbers for each list/page_size
-   else if (in_free_block  ) {
+   else if (in_free_block) {
         printf("\t\t%d-%d: Free frame(s)\n",
                start * list->page_size,
                ((i) * list->page_size) - 1);
@@ -138,8 +138,8 @@ void free_memory_for_pid(frame_list* list, int pid) {
     for (i = 0; i < list->number_of_frames; i += 1) {
        frame = &list->frames[i];
 
-        if (frame->proc_assign == pid) {
-            frame->proc_assign = 0;
+        if (frame->process_assign == pid) {
+            frame->process_assign = 0;
             frame->page_num = 0;
             frame->assigned = 0;
         }
