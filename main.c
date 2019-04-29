@@ -6,12 +6,12 @@
 #include "prototypes.h"
 
 // global constants
-const int TIME_MAX = 100000;
+const int MAX_TIME= 100000;
 
 // shared data
 int number_of_procs = 0, last_announcement = -1;
-PROCESS* proc_list;
-proc_queue* queue;
+PROCESS* process_list;
+process_queue* queue;
 frame_list* framelist;
 
 void main_loop() {
@@ -30,7 +30,7 @@ void main_loop() {
         current_time++;
 
 	//check for deadlocks 
-        if (current_time > TIME_MAX) {
+        if (current_time > MAX_TIME) {
             printf("DEADLOCK: max time reached\n");
             break;
         }
@@ -54,10 +54,10 @@ int main() {
     get_user_input(&mem_size, &page_size, file_path);
 
     //read values from the input file into a shared proc list
-    proc_list = assign_process_list(file_path);
+    process_list = assign_process_list(file_path);
 
     //make a shared queue w/ a capacity equal to number of procs
-    queue = create_proc_queue(number_of_procs);
+    queue = create_process_queue(number_of_procs);
 
     //make a shared framelist
     framelist = create_frame_list(mem_size / page_size, page_size);
@@ -70,20 +70,20 @@ int main() {
 //function to add the processes into the queue
 void enqueue_newly_arrived_procs(int current_time) {
     int i;
-    PROCESS* proc;
+    PROCESS* process;
 
     for (i = 0; i < number_of_procs; i += 1) {
-        proc = &proc_list[i];
+        process = &process_list[i];
 
 	//announce the arrival times
-        if (proc->arrival_time == current_time) {
+        if (process->arrival_time == current_time) {
             printf("%sProcess %d arrives\n",
                    get_announcement_prefix(current_time),
-                   proc->pid);
+                   process->pid);
 
-            enqueue_proc(queue, proc);
+            enqueue_process(queue, process);
 
-            print_proc_queue(queue);
+            print_process_queue(queue);
         }
     }
 }
@@ -91,22 +91,22 @@ void enqueue_newly_arrived_procs(int current_time) {
 //function to remove process from the queue and from the memory
 void terminate_completed_procs(int current_time) {
     int i, time_spent_in_memory;
-    PROCESS* proc;
+    PROCESS* process;
 
     // dequeue any procs that need it
     for (i = 0; i < number_of_procs; i += 1) {
-        proc = &proc_list[i];
-        time_spent_in_memory = current_time - proc->time_added_to_memory;
+        process = &process_list[i];
+        time_spent_in_memory = current_time - process->time_added_to_memory;
 
-        if (proc->is_active && (time_spent_in_memory >= proc->life_time)) {
+        if (process->is_active && (time_spent_in_memory >= process->life_time)) {
             printf("%sProcess %d completes\n",
                    get_announcement_prefix(current_time),
-                   proc->pid);
+                   process->pid);
 
-            proc->is_active = 0;
-            proc->time_finished = current_time;
+            process->is_active = 0;
+            process->time_finished = current_time;
 
-            free_memory_for_pid(framelist, proc->pid);
+            free_memory_for_pid(framelist, process->pid);
 
             print_frame_list(framelist);
         }
@@ -116,7 +116,7 @@ void terminate_completed_procs(int current_time) {
 //this function allows any waiting process into queue if it can fit into memory 
 void assign_available_memory_to_waiting_procs(int current_time) {
     int i, index, limit;
-    PROCESS* proc;
+    PROCESS* process;
 
     //set the limit to the size of the queue
     limit = queue->size;
@@ -124,20 +124,20 @@ void assign_available_memory_to_waiting_procs(int current_time) {
     // enqueue any procs that can be put into mem
     for (i = 0; i < limit; i += 1) {
         index = iterate_queue_index(queue, i);
-        proc = queue->elements[index];
+        process = queue->elements[index];
 	//if the process can fit into the mem then add it
-        if (proc_can_fit_into_memory(framelist, proc)) {
+        if (process_can_fit_into_memory(framelist, process)) {
             printf("%sMM moves Process %d to memory\n",
                    get_announcement_prefix(current_time),
-                   proc->pid);
+                   process->pid);
 
-            fit_proc_into_memory(framelist, proc);
+            fit_process_into_memory(framelist, process);
 
-            proc->is_active = 1;
-            proc->time_added_to_memory = current_time;
+            process->is_active = 1;
+            process->time_added_to_memory = current_time;
 
-            dequeue_proc_at_index(queue, i);
-            print_proc_queue(queue);
+            dequeue_process_at_index(queue, i);
+            print_process_queue(queue);
             print_frame_list(framelist);
         }
     }
@@ -165,7 +165,7 @@ void print_turnaround_times() {
 
     //calculate the turnaround_times
     for (i = 0; i < number_of_procs; i += 1) {
-        total += proc_list[i].time_finished - proc_list[i].arrival_time;
+        total += process_list[i].time_finished - process_list[i].arrival_time;
     }
     //print our the turnaraount times
     printf("Average Turnaround Time: %2.2f\n", total / number_of_procs);
@@ -295,7 +295,7 @@ PROCESS* assign_process_list(const char* file_path) {
     number_of_procs = get_number_of_processes_from_file(filePtr);
 
     // allocate space for process array
-    PROCESS* procList = malloc(number_of_procs * sizeof(PROCESS));
+    PROCESS* processList = malloc(number_of_procs * sizeof(PROCESS));
 
     if (!filePtr) {
         printf("ERROR: Failed to open file %s", file_path);
@@ -305,9 +305,9 @@ PROCESS* assign_process_list(const char* file_path) {
     while (!feof(filePtr) && counter < number_of_procs) {
         // store values for processes
         fscanf(filePtr, "%d %d %d %d",
-               &(procList[counter].pid),
-               &(procList[counter].arrival_time),
-               &(procList[counter].life_time),
+               &(processList[counter].pid),
+               &(processList[counter].arrival_time),
+               &(processList[counter].life_time),
                &numSpace);
 
         // get total memory requirements for process
@@ -317,15 +317,15 @@ PROCESS* assign_process_list(const char* file_path) {
             totalSpace += tmp;
         }
 	//assign values
-        procList[counter].mem_reqs = totalSpace;
-        procList[counter].is_active = 0;
-        procList[counter].time_added_to_memory = -1;
-        procList[counter].time_finished = -1;
+        processList[counter].mem_reqs = totalSpace;
+        processList[counter].is_active = 0;
+        processList[counter].time_added_to_memory = -1;
+        processList[counter].time_finished = -1;
 
         counter++;
     }
 
     fclose(filePtr);
 
-    return procList;
+    return processList;
 }
