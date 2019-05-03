@@ -15,7 +15,7 @@ processQue* createProcessQue(int length) {
 
     q->elements = malloc(sizeof(PROCESS) * length);
     q->size = 0;
-    q- cap = length;
+    q-> cap = length;
     q->front = 0;
     q->rear = -1;
 
@@ -24,7 +24,7 @@ processQue* createProcessQue(int length) {
 
 //add to the queue
 void enqProcess(processQue* q, PROCESS* process) {
-    if (q->size == q- cap) {
+    if (q->size == q-> cap) {
         printf("ERROR: queue is full to cap!\n");
 	exit(2);
     }
@@ -32,7 +32,7 @@ void enqProcess(processQue* q, PROCESS* process) {
     q->size++;
     q->rear = q->rear + 1;
 
-    if (q->rear == q- cap) {
+    if (q->rear == q-> cap) {
         q->rear = 0;
     }
     q->elements[q->rear] = process;
@@ -63,7 +63,7 @@ void dequeProcess(processQue* q) {
    q->size--;
    q->front++;
 
-    if (q->front == q- cap) {
+    if (q->front == q-> cap) {
         q->front = 0;
     }
 }
