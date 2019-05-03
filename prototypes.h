@@ -45,4 +45,4 @@ int multipleOfOneHundred(int t);
 void printTurnaroundTimes();
 
 //prompts the user for a valid filename
-void promptFile(char* res);
+void prompt_for_filename(char* res);

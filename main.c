@@ -12,20 +12,21 @@ const int TIME_MAX = 100000;
 int number_of_procs = 0, last_announcement = -1;
 PROCESS* proc_list;
 processQue* queue;
-frame_list* framelist;
 
-void mainLoop() {
+
+
+void main_loop() {
     long current_time = 0;
 
     while (1) {
 	//if a proc arrives then add it to the queue
-        enqueueNewlyArrivedProcs(current_time);
+        enqueue_newly_arrived_procs(current_time);
 
 	//if a proc completes, then remove it
-        terminateCompletedProcs(current_time);
+        terminate_completed_procs(current_time);
 
         //assign available memory to a process that need it
-        assignAvailableMemoryToWaitingProcs(current_time);
+        assign_available_memory_to_waiting_procs(current_time);
 
         current_time++;
 
@@ -41,7 +42,7 @@ void mainLoop() {
     }
 
     //print out all the info for the procs
-    printTurnaroundTimes();
+    print_turnaround_times();
 }
 
 int main() {
@@ -89,7 +90,7 @@ void enqueueNewlyArrivedProcs(int current_time) {
 }
 
 //function to remove process from the queue and from the memory
-void terminateCompletedProcs(int current_time) {
+void terminate_completed_procs(int current_time) {
     int i, time_spent_in_memory;
     PROCESS* proc;
 
@@ -179,7 +180,7 @@ int isOneTwoOrThree(int t) {
     return (t >= 1 && t <= 3) ? 1 : 0;
 }
 
-void clearStdin(char* buf) {
+void clear_stdin(char* buf) {
     if (buf[strlen(buf) - 1] != '\n') {
         int ch;
         while (((ch = getchar()) != '\n') && (ch != EOF)) ;
@@ -195,21 +196,21 @@ int process_numeric_input_from_user(const char* output, int (*func)(int)) {
         printf("%s: ", output);
 
         if (fgets(buf, 10, stdin) == NULL) {
-            clearStdin(buf);
+            clear_stdin(buf);
             printf("ERROR: You didn't enter any data!\n");
 
             continue;
         }
 
         if (sscanf(buf, "%d", &res) <= 0) {
-            clearStdin(buf);
+            clear_stdin(buf);
             printf("ERROR: You didn't enter a number!\n");
 
             continue;
         }
 
         if (!(success = (*func)(res))) {
-            clearStdin(buf);
+            clear_stdin(buf);
             printf("ERROR: That number is not a valid choice\n");
         }
     }
@@ -228,14 +229,14 @@ void prompt_for_filename(char* res) {
 
 //IF STATEMENTS CHECK USER INPUT
         if (fgets(buf, 100, stdin) == NULL) {
-            clearStdin(buf);
+            clear_stdin(buf);
             printf("ERROR: You didn't enter any data!\n");
 
             continue;
         }
 
         if (sscanf(buf, "%s", res) <= 0) {
-            clearStdin(buf);
+            clear_stdin(buf);
             printf("ERROR: You didn't enter a string!\n");
 
             continue;
@@ -285,7 +286,7 @@ int get_number_of_processes_from_file(FILE* filePtr) {
 }
 
 //stores the values of the processes into the process array
-PROCESS* assignProcessList(const char* file_path) {
+PROCESS* assign_process_list(const char* file_path) {
     int numSpace;
     int tmp;
     int counter = 0;

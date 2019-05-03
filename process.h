@@ -3,13 +3,13 @@
 
 typedef struct {
     int pid;
-    int arrivalTime;
-    int lifeTime;
-    int memReqs;
+    int arrival_time;
+    int life_time;
+    int mem_reqs;
 
-    int timeAddedToMemory;
-    int isActive;
-    int timeFinished;
+    int time_added_to_memory;
+    int is_active;
+    int time_finished;
 } PROCESS;
 #endif
 
