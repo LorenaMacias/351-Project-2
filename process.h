@@ -12,4 +12,3 @@ typedef struct {
     int time_finished;
 } PROCESS;
 #endif
-

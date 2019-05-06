@@ -15,7 +15,7 @@ proc_queue* create_proc_queue(int length) {
 
     q->elements = malloc(sizeof(PROCESS) * length);
     q->size = 0;
-    q-> cap = length;
+    q->capacity = length;
     q->front = 0;
     q->rear = -1;
 
@@ -23,16 +23,17 @@ proc_queue* create_proc_queue(int length) {
 }
 
 //add to the queue
-void enqProcess(processQue* q, PROCESS* process) {
-    if (q->size == q-> cap) {
-        printf("ERROR: queue is full to cap!\n");
-	exit(2);
+void enqueue_proc(proc_queue* q, PROCESS* proc) {
+    if (q->size == q->capacity) {
+        printf("ERROR: queue is full to capacity!\n");
+
+        exit(2);
     }
 
     q->size++;
     q->rear = q->rear + 1;
 
-    if (q->rear == q-> cap) {
+    if (q->rear == q->capacity) {
         q->rear = 0;
     }
 
@@ -63,7 +64,10 @@ void dequeue_proc(proc_queue* q) {
         exit(2);
     }
 
-    if (q->front == q-> cap) {
+    q->size--;
+    q->front++;
+
+    if (q->front == q->capacity) {
         q->front = 0;
     }
 }

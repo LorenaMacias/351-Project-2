@@ -3,46 +3,46 @@
 #include "memory.h"
 
 //makes a list of processes given the filepath
-PROCESS* assignProcessList(const char* file_path);
+PROCESS* assign_process_list(const char* file_path);
 
 //returns a string or tab based on whats been announced (if any) 
-char* getAnnouncementPrefix(int current_time);
+char* get_announcement_prefix(int current_time);
 
 //gets number of processes (first num is provided by the file)
-int getNumberOfProcessesFromFile(FILE* filePtr);
+int get_number_of_processes_from_file(FILE* filePtr);
 
 //the main function
 int main();
 
 //asks for number input from user and checks if its valid provided by function pointer
-int processNumericInputFromUser(const char* output, int (*func)(int));
+int process_numeric_input_from_user(const char* output, int (*func)(int));
 
 //assigns available memory to the waiting procs that can fit in
-void assignAvailableMemoryToWaitingProcs(int current_time);
+void assign_available_memory_to_waiting_procs(int current_time);
 
 //clears any extra chars from stdin
-void clearStdin(char* buf);
+void clear_stdin(char* buf);
 
 //removes the completed procs from memory
-void terminateCompletedProcs(int current_time);
+void terminate_completed_procs(int current_time);
 
 //adds newly arrived procs to the input queue
-void enqueueNewlyArrivedProcs(int current_time);
+void enqueue_newly_arrived_procs(int current_time);
 
 //gets the user input (mem size, number of pages, path to input file)
-void getUserInput(int* mem, int* page, char* file_path);
+void get_user_input(int* mem, int* page, char* file_path);
 
 //returns a 1 if the int is a 1, 2, or 3 and a 0 if not
-int isOneTwoOrThree(int t);
+int is_one_two_or_three(int t);
 
 //the main program loop
-void mainLoop();
+void main_loop();
 
 //returns a 1 if the int is a multiple of 100 and a 0 if not
-int multipleOfOneHundred(int t);
+int multiple_of_one_hundred(int t);
 
 //prints the average turnaround time
-void printTurnaroundTimes();
+void print_turnaround_times();
 
 //prompts the user for a valid filename
 void prompt_for_filename(char* res);

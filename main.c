@@ -11,9 +11,8 @@ const int TIME_MAX = 100000;
 // shared data
 int number_of_procs = 0, last_announcement = -1;
 PROCESS* proc_list;
-processQue* queue;
-
-
+proc_queue* queue;
+frame_list* framelist;
 
 void main_loop() {
     long current_time = 0;
@@ -52,13 +51,13 @@ int main() {
     char* file_path = malloc(100 * sizeof(char));
 
     //get user input
-    getUserInput(&mem_size, &page_size, file_path);
+    get_user_input(&mem_size, &page_size, file_path);
 
     //read values from the input file into a shared proc list
-    proc_list = assignProcessList(file_path);
+    proc_list = assign_process_list(file_path);
 
     //make a shared queue w/ a capacity equal to number of procs
-    queue = create_processQue(number_of_procs);
+    queue = create_proc_queue(number_of_procs);
 
     //make a shared framelist
     framelist = create_frame_list(mem_size / page_size, page_size);
@@ -69,7 +68,7 @@ int main() {
 }
 
 //function to add the processes into the queue
-void enqueueNewlyArrivedProcs(int current_time) {
+void enqueue_newly_arrived_procs(int current_time) {
     int i;
     PROCESS* proc;
 
@@ -77,14 +76,14 @@ void enqueueNewlyArrivedProcs(int current_time) {
         proc = &proc_list[i];
 
 	//announce the arrival times
-        if (proc->arrivalTime == current_time) {
+        if (proc->arrival_time == current_time) {
             printf("%sProcess %d arrives\n",
-                   getAnnouncementPrefix(current_time),
+                   get_announcement_prefix(current_time),
                    proc->pid);
 
             enqueue_proc(queue, proc);
 
-            print_processQue(queue);
+            print_proc_queue(queue);
         }
     }
 }
@@ -97,15 +96,15 @@ void terminate_completed_procs(int current_time) {
     // dequeue any procs that need it
     for (i = 0; i < number_of_procs; i += 1) {
         proc = &proc_list[i];
-        time_spent_in_memory = current_time - proc->timeAddedToMemory;
+        time_spent_in_memory = current_time - proc->time_added_to_memory;
 
-        if (proc->isActive && (time_spent_in_memory >= proc->lifeTime)) {
+        if (proc->is_active && (time_spent_in_memory >= proc->life_time)) {
             printf("%sProcess %d completes\n",
-                   getAnnouncementPrefix(current_time),
+                   get_announcement_prefix(current_time),
                    proc->pid);
 
-            proc->isActive = 0;
-            proc->timeFinished = current_time;
+            proc->is_active = 0;
+            proc->time_finished = current_time;
 
             free_memory_for_pid(framelist, proc->pid);
 
@@ -115,7 +114,7 @@ void terminate_completed_procs(int current_time) {
 }
 
 //this function allows any waiting process into queue if it can fit into memory 
-void assignAvailableMemoryToWaitingProcs(int current_time) {
+void assign_available_memory_to_waiting_procs(int current_time) {
     int i, index, limit;
     PROCESS* proc;
 
@@ -129,22 +128,22 @@ void assignAvailableMemoryToWaitingProcs(int current_time) {
 	//if the process can fit into the mem then add it
         if (proc_can_fit_into_memory(framelist, proc)) {
             printf("%sMM moves Process %d to memory\n",
-                   getAnnouncementPrefix(current_time),
+                   get_announcement_prefix(current_time),
                    proc->pid);
 
             fit_proc_into_memory(framelist, proc);
 
-            proc->isActive = 1;
-            proc->timeAddedToMemory = current_time;
+            proc->is_active = 1;
+            proc->time_added_to_memory = current_time;
 
             dequeue_proc_at_index(queue, i);
-            print_processQue(queue);
+            print_proc_queue(queue);
             print_frame_list(framelist);
         }
     }
 }
 
-char* getAnnouncementPrefix(int current_time) {
+char* get_announcement_prefix(int current_time) {
     char* result;
 
     result = malloc(20 * sizeof(char));
@@ -160,23 +159,23 @@ char* getAnnouncementPrefix(int current_time) {
     return result;
 }
 
-void printTurnaroundTimes() {
+void print_turnaround_times() {
     int i;
     float total = 0;
 
     //calculate the turnaround_times
     for (i = 0; i < number_of_procs; i += 1) {
-        total += proc_list[i].timeFinished - proc_list[i].arrivalTime;
+        total += proc_list[i].time_finished - proc_list[i].arrival_time;
     }
     //print our the turnaraount times
     printf("Average Turnaround Time: %2.2f\n", total / number_of_procs);
 }
 
-int multipleOfOneHundred(int t) {
+int multiple_of_one_hundred(int t) {
     return (t % 100) == 0 ? 1 : 0;
 }
 
-int isOneTwoOrThree(int t) {
+int is_one_two_or_three(int t) {
     return (t >= 1 && t <= 3) ? 1 : 0;
 }
 
@@ -251,13 +250,13 @@ void prompt_for_filename(char* res) {
 }
 
 // prompts for memory size and page size
-void getUserInput(int* mem, int* page, char* file_path) {
+void get_user_input(int* mem, int* page, char* file_path) {
     while (1) {
         *mem = process_numeric_input_from_user(
-            "Memory size", multipleOfOneHundred);
+            "Memory size", multiple_of_one_hundred);
 
         *page = process_numeric_input_from_user(
-            "Page size (1: 100, 2: 200, 3: 400)", isOneTwoOrThree);
+            "Page size (1: 100, 2: 200, 3: 400)", is_one_two_or_three);
 
         switch (*page) {
         case 1: *page = 100; break;
@@ -302,13 +301,13 @@ PROCESS* assign_process_list(const char* file_path) {
         printf("ERROR: Failed to open file %s", file_path);
         exit(1);
     }
-
+	
     while (!feof(filePtr) && counter < number_of_procs) {
         // store values for processes
         fscanf(filePtr, "%d %d %d %d",
                &(procList[counter].pid),
-               &(procList[counter].arrivalTime),
-               &(procList[counter].lifeTime),
+               &(procList[counter].arrival_time),
+               &(procList[counter].life_time),
                &numSpace);
 
         // get total memory requirements for process
@@ -318,10 +317,10 @@ PROCESS* assign_process_list(const char* file_path) {
             totalSpace += tmp;
         }
 	//assign values
-        procList[counter].memReqs = totalSpace;
-        procList[counter].isActive = 0;
-        procList[counter].timeAddedToMemory = -1;
-        procList[counter].timeFinished = -1;
+        procList[counter].mem_reqs = totalSpace;
+        procList[counter].is_active = 0;
+        procList[counter].time_added_to_memory = -1;
+        procList[counter].time_finished = -1;
 
         counter++;
     }

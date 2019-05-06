@@ -40,14 +40,14 @@ int proc_can_fit_into_memory(frame_list* list, PROCESS* proc) {
     }
 
     //checks if the number of free frames times the page size is greater than the mem_req for the   	given process
-    return (num_free_frames * list->pageSize) >= process->memReqs;
+    return (num_free_frames * list->page_size) >= proc->mem_reqs;
 }
 
 void fit_proc_into_memory(frame_list* list, PROCESS* proc) {
     //assuming you already checked that you are able to fit the proc into mem 
     int i, remaining_mem, current_page = 1;
 
-    remaining_mem = process->memReqs;
+    remaining_mem = proc->mem_reqs;
 
     for (i = 0; i < list->number_of_frames; i += 1) {
         // if this frame is not assigned
